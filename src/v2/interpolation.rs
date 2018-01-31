@@ -630,12 +630,22 @@ where
     }
 }
 
+/// Select the behavior to use when an environment variable is missing during
+/// interpolation.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum InterpolateMissing {
+    /// Leave values in the uninterpolated state if they cannot be interpolated.
+    Passthrough,
+    /// Produce an error if a variable cannot be interpolated.
+    Error,
+}
+
 /// Support for environment variable interpolation.
 pub trait InterpolateAll {
     /// Recursively walk over this type, interpolating all `RawOr` values
     /// containing references to the environment.  The default
     /// implementation leaves a value unchanged.
-    fn interpolate_all(&mut self) -> Result<()> {
+    fn interpolate_all(&mut self, _: InterpolateMissing) -> Result<()> {
         Ok(())
     }
 }
@@ -648,36 +658,39 @@ impl InterpolateAll for String {}
 impl InterpolateAll for () {}
 
 impl<T: InterpolateAll> InterpolateAll for Option<T> {
-    fn interpolate_all(&mut self) -> Result<()> {
+    fn interpolate_all(&mut self, missing: InterpolateMissing) -> Result<()> {
         if let Some(ref mut v) = *self {
-            v.interpolate_all()?;
+            v.interpolate_all(missing)?;
         }
         Ok(())
     }
 }
 
 impl<T: InterpolateAll> InterpolateAll for Vec<T> {
-    fn interpolate_all(&mut self) -> Result<()> {
+    fn interpolate_all(&mut self, missing: InterpolateMissing) -> Result<()> {
         for v in self.iter_mut() {
-            v.interpolate_all()?;
+            v.interpolate_all(missing)?;
         }
         Ok(())
     }
 }
 
 impl<K: Ord + Clone, T: InterpolateAll> InterpolateAll for BTreeMap<K, T> {
-    fn interpolate_all(&mut self) -> Result<()> {
+    fn interpolate_all(&mut self, missing: InterpolateMissing) -> Result<()> {
         for (_k, v) in self.iter_mut() {
-            v.interpolate_all()?;
+            v.interpolate_all(missing)?;
         }
         Ok(())
     }
 }
 
 impl<T: InterpolatableValue> InterpolateAll for RawOr<T> {
-    fn interpolate_all(&mut self) -> Result<()> {
-        self.interpolate()?;
-        Ok(())
+    fn interpolate_all(&mut self, missing: InterpolateMissing) -> Result<()> {
+        match self.interpolate() {
+            Ok(_) => Ok(()),
+            Err(Error(ErrorKind::InterpolateUndefinedVariable(_), _)) if missing == InterpolateMissing::Passthrough => Ok(()),
+            Err(e) => Err(e),
+        }
     }
 }
 
@@ -687,9 +700,9 @@ macro_rules! derive_interpolate_all_for {
     ($ty:ident, { $( $field:ident ),+ }) => {
         /// Recursive merge all fields in the structure.
         impl $crate::v2::interpolation::InterpolateAll for $ty {
-            fn interpolate_all(&mut self) -> Result<()>
+            fn interpolate_all(&mut self, missing: InterpolateMissing) -> Result<()>
             {
-                $( self.$field.interpolate_all()?; )+
+                $( self.$field.interpolate_all(missing)?; )+
                 Ok(())
             }
         }

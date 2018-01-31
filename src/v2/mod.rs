@@ -26,7 +26,7 @@ use self::helpers::*;
 use self::env_file::EnvFile;
 pub use self::git_url::GitUrl;
 pub use self::interpolation::{escape, raw, value, Environment, InterpolateAll,
-                              OsEnvironment, RawOr};
+                              InterpolateMissing, OsEnvironment, RawOr};
 pub use self::merge_override::MergeOverride;
 pub use self::mode_enum::*;
 use self::string_or_struct::*;

@@ -91,7 +91,7 @@ impl File {
         // We need to interpolate first, in case there are environment
         // variables being used to construct the paths to `env_files`
         // entries.
-        self.interpolate_all()?;
+        self.interpolate_all(InterpolateMissing::Error)?;
         self.inline_all(base)
     }
 }

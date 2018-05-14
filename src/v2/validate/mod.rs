@@ -21,7 +21,7 @@ pub fn validate_file(file: &File) -> Result<()> {
         vers => return Err(ErrorKind::UnsupportedVersion(vers.to_owned()).into()),
     };
 
-    warn!("docker-compose.yml file validation disabled until valico is updated");
+    //warn!("docker-compose.yml file validation disabled until valico is updated");
 
     Ok(())
 }

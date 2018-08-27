@@ -95,6 +95,10 @@ pub struct Service {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub image: Option<RawOr<Image>>,
 
+    /// Whether or not to use an init process.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub init: Option<String>,
+
     /// Docker labels for this container, specifying various sorts of
     /// custom metadata.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty",
@@ -266,6 +270,7 @@ derive_standard_impls_for!(Service, {
     external_links,
     extra_hosts,
     image,
+    init,
     labels,
     links,
     logging,

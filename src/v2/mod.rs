@@ -94,3 +94,4 @@ include!("volumes_from.rs");
 
 // Network-related types.
 include!("external_network.rs");
+include!("ipam.rs");

@@ -42,7 +42,9 @@ pub struct Network {
             deserialize_with = "deserialize_map_or_key_value_list")]
     pub labels: BTreeMap<String, RawOr<String>>,
 
-    // TODO LOW: ipam
+    /// Specify a custom IPAM config.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ipam: Option<Ipam>,
 
     /// PRIVATE.  Mark this struct as having unknown fields for future
     /// compatibility.  This prevents direct construction and exhaustive
@@ -54,7 +56,7 @@ pub struct Network {
 }
 
 derive_standard_impls_for!(Network, {
-    driver, driver_opts, external, internal, enable_ipv6, labels, _hidden
+    driver, driver_opts, external, internal, enable_ipv6, labels, ipam, _hidden
 });
 
 #[test]
@@ -82,6 +84,17 @@ fn network_handles_external_name_correctly() {
     let yaml = r#"---
 external:
   name: bridge
+"#;
+    assert_roundtrip!(Network, yaml);
+}
+
+#[test]
+fn network_handles_ipam_correctly() {
+    let yal = r#"---
+ipam:
+  config:
+    - subnet: 172.28.0.0/16
+      gateway: 172.28.5.254
 "#;
     assert_roundtrip!(Network, yaml);
 }

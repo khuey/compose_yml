@@ -11,7 +11,10 @@ pub struct NetworkInterface {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub aliases: Vec<RawOr<String>>,
 
-    // TODO LOW: ipv4_address
+    /// Specify a static ipv4 address on this network.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub ipv4_address: String,
+
     // TODO LOW: ipv6_address
     // TODO LOW: link_local_ips
 
@@ -25,5 +28,5 @@ pub struct NetworkInterface {
 }
 
 derive_standard_impls_for!(NetworkInterface, {
-    aliases, _hidden
+    aliases, ipv4_address, _hidden
 });

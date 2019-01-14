@@ -97,7 +97,7 @@ pub struct Service {
 
     /// Whether or not to use an init process.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub init: Option<String>,
+    pub init: Option<bool>,
 
     /// Docker labels for this container, specifying various sorts of
     /// custom metadata.

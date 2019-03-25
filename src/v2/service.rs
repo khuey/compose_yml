@@ -194,8 +194,8 @@ pub struct Service {
     pub memswap_limit: Option<RawOr<MemorySize>>,
 
     /// The MAC address to use for this container's network interface.
-    #[serde(default, skip_serializing_if = "is_false")]
-    pub privileged: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub privileged: Option<bool>,
 
     // TODO LOW: read_only (what is this, anyway?)
 
